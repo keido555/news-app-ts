@@ -11,11 +11,8 @@ import axios from "axios";
 import { ListItem } from "../components/ListItem";
 import { Loading } from "../components/Loading";
 import { RootStackParamList } from "../types/navigation";
-import manifest from "../app.json";
 
 import { StackNavigationProp } from "@react-navigation/stack";
-
-const URL = `https://newsapi.org/v2/top-headlines?country=js&category=business&apiKey=${Constants.manifest?.extra.newsApiKey}`;
 
 const styles = StyleSheet.create({
   container: {
@@ -26,7 +23,6 @@ const styles = StyleSheet.create({
 
 type Props = {
   navigation: StackNavigationProp<RootStackParamList, "Home">;
-  // route: RouteProp<RootStackParamList, "Home">;
 };
 
 export const HomeScreen = ({ navigation }: Props) => {
@@ -43,18 +39,24 @@ export const HomeScreen = ({ navigation }: Props) => {
   }, []);
 
   const fetchArticles = async (page: any) => {
-    try {
-      const response = await axios.get(`${URL}&page=${page}`);
-      if (response.data.articles.length > 0) {
-        setArticles((prevArticles): any => [
-          ...prevArticles,
-          ...response.data.articles,
-        ]);
-      } else {
-        fetchedAllRef.current = true;
+    if (Constants.manifest === null || Constants.manifest.extra === void 0) {
+      return "ERROR";
+    } else {
+      try {
+        const URL = `https://newsapi.org/v2/top-headlines?country=js&category=business&apiKey=${Constants.manifest.extra.newsApiKey}`;
+
+        const response = await axios.get(`${URL}&page=${page}`);
+        if (response.data.articles.length > 0) {
+          setArticles((prevArticles): any => [
+            ...prevArticles,
+            ...response.data.articles,
+          ]);
+        } else {
+          fetchedAllRef.current = true;
+        }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
     }
   };
 
